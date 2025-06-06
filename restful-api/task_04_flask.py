@@ -2,11 +2,8 @@ from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
-# In-memory users dictionary
-users = {
-    "jane": {"username": "jane", "name": "Jane", "age": 28, "city": "Los Angeles"},
-    "john": {"username": "john", "name": "John", "age": 30, "city": "New York"},
-}
+# In-memory users dictionary should start empty for tests to pass
+users = {}
 
 @app.route('/')
 def home():
