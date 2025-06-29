@@ -1,25 +1,47 @@
 #!/usr/bin/python3
 """
-Lists all values in the states table of a database where name
-matches the argument.
+Module for filtering states by user input
 """
 
-import sys
 import MySQLdb
+import sys
 
-if __name__ == '__main__':
-    db = MySQLdb.connect(user=sys.argv[1], passwd=sys.argv[2],
-                         db=sys.argv[3], port=3306)
 
-    cur = db.cursor()
-    query = ("SELECT * FROM states "
-             "WHERE CONVERT(`name` USING Latin1) COLLATE Latin1_General_CS = '{}' "
-             "ORDER BY id ASC;").format(sys.argv[4])
-    cur.execute(query)
-    states = cur.fetchall()
+def main():
+    """
+    Main function to connect to database and filter states by name
+    """
+    if len(sys.argv) != 5:
+        print("Usage: ./2-my_filter_states.py <username> <password> "
+              "<database> <state_name>")
+        sys.exit(1)
 
-    for state in states:
-        print(state)
+    try:
+        connection = MySQLdb.connect(
+            host="localhost",
+            port=3306,
+            user=sys.argv[1],
+            password=sys.argv[2],
+            database=sys.argv[3]
+        )
 
-    cur.close()
-    db.close()
+        cursor = connection.cursor()
+        cursor.execute(
+            "SELECT * FROM states WHERE name = '{}' ORDER BY id".format(
+                sys.argv[4]
+            )
+        )
+
+        for row in cursor.fetchall():
+            print(row)
+
+        cursor.close()
+        connection.close()
+
+    except MySQLdb.Error as e:
+        print(f"Error: {e}")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
