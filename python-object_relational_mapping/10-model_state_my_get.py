@@ -1,37 +1,27 @@
 #!/usr/bin/python3
-"""
-Prints the State id from the database hbtn_0e_6_usa based on state name
-"""
+"""Prints the State object with the name passed as argument from the database."""
 
 import sys
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session
 from model_state import Base, State
 
-def main():
-    if len(sys.argv) != 5:
-        return
-
-    user = sys.argv[1]
-    password = sys.argv[2]
-    database = sys.argv[3]
-    state_name = sys.argv[4]
-
+if __name__ == "__main__":
     # Create engine to connect to the MySQL database
-    engine = create_engine(f"mysql+mysqldb://{user}:{password}@localhost:3306/{database}")
+    engine = create_engine(
+        'mysql+mysqldb://{}:{}@localhost/{}'.format(
+            sys.argv[1], sys.argv[2], sys.argv[3]
+        ),
+        pool_pre_ping=True
+    )
 
-    # Bind Base metadata to the engine
-    Base.metadata.bind = engine
+    # Start a session
+    session = Session(engine)
 
-    # Create a configured "Session" class
-    Session = sessionmaker(bind=engine)
+    # Safely query the State object matching the provided name
+    state = session.query(State).filter(State.name == sys.argv[4]).first()
 
-    # Create a session
-    session = Session()
-
-    # Query the State table for a state matching the state_name
-    state = session.query(State).filter(State.name == state_name).first()
-
+    # Print the result or Not found
     if state:
         print(state.id)
     else:
@@ -39,6 +29,3 @@ def main():
 
     # Close the session
     session.close()
-
-if __name__ == "__main__":
-    main()
